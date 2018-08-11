@@ -66,9 +66,10 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         try{
             db.insert(TABLE_STATS, null, values)
-            db.close()
         } catch (e: Exception){
             Log.i(tag, "Failed to insert stats into $TABLE_STATS with exception ${e.message}")
+        }finally {
+            db.close()
         }
     }
 
@@ -82,9 +83,11 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         try{
             db.insert(TABLE_KV, null, values)
-            db.close()
+
         } catch (e: Exception){
             Log.i(tag, "Failed to insert stats into $TABLE_KV with exception ${e.message}")
+        }finally {
+            db.close()
         }
     }
 
