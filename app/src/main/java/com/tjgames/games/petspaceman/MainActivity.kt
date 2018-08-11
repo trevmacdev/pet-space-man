@@ -1,4 +1,4 @@
-package com.tjgames.games.pet_spaceman
+package com.tjgames.games.petspaceman
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle

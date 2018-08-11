@@ -1,4 +1,4 @@
-package com.tjgames.games.pet_spaceman
+package com.tjgames.games.petspaceman
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("com.tjgames.games.pet_spaceman", appContext.packageName)
+        assertEquals("com.tjgames.games.petspaceman", appContext.packageName)
     }
 }

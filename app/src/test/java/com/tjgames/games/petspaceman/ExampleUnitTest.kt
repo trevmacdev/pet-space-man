@@ -1,4 +1,4 @@
-package com.tjgames.games.pet_spaceman
+package com.tjgames.games.petspaceman
 
 import org.junit.Test
 

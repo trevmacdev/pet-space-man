@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.tjgames.games.pet_spaceman"
+        applicationId "com.tjgames.games.petspaceman"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
