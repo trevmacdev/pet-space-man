@@ -73,7 +73,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         }
     }
 
-    fun insertkvp(key: String, value: String){
+    fun insertKVP(key: String, value: String){
 
         val values = ContentValues()
         values.put(COLUMN_KEY, key)
@@ -89,6 +89,112 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         }finally {
             db.close()
         }
+    }
+
+    fun selectKVPValue(key: String) : String{
+
+        val db = this.readableDatabase
+
+        var rs: String? = null
+
+        val qry = """
+            SELECT $COLUMN_VALUE
+            FROM $TABLE_KV
+            WHERE $COLUMN_KEY = \"$key\"
+        """.trimIndent()
+
+        try {
+            val cursor = db.rawQuery(qry, null)
+            if (cursor.moveToFirst()){
+                cursor.moveToFirst()
+
+                val rs = cursor.getString(0)
+                cursor.close()
+            }
+        } catch (e: Exception){
+            rs = "No value"
+            Log.i(tag, "Failed to execute query $qry with exception ${e.message}")
+
+        } finally {
+            db.close()
+            return rs!!
+        }
+    }
+
+    fun selectStat(stat: String, v: String): Int{
+
+        val db = this.readableDatabase
+
+        var rs: Int? = null
+
+        val qry = """
+            SELECT $v
+            FROM $TABLE_STATS
+            WHERE $COLUMN_STAT
+            = \"$stat\"
+        """.trimIndent()
+
+        try {
+            val cursor = db.rawQuery(qry, null)
+            if (cursor.moveToFirst()){
+                cursor.moveToFirst()
+
+                val rs = cursor.getInt(0)
+                cursor.close()
+            }
+        } catch (e: Exception){
+            rs = 0
+            Log.i(tag, "Failed to execute query $qry with exception ${e.message}")
+
+        } finally {
+            db.close()
+            return rs!!
+        }
+    }
+
+    fun updateTableKVP(key: String, value: String){
+
+        val db = this.writableDatabase
+
+        val values = ContentValues()
+        values.put(COLUMN_VALUE, value)
+
+        try{
+            db.update(TABLE_KV, values, "$COLUMN_KEY = $key", null)
+        }catch (e: Exception){
+            Log.i(tag, "Failed to update kvp table $key with exception ${e.message}")
+        }finally {
+            db.close()
+        }
+    }
+
+    fun updateTableCLevel(stat: String, value: Int){
+
+        val db = this.writableDatabase
+
+        val values = ContentValues()
+        values.put(COLUMN_CLEVEL, value)
+
+        try{
+            db.update(TABLE_STATS, values, "$COLUMN_STAT = $stat", null)
+        }catch (e: Exception){
+            Log.i(tag, "Failed to update stat clevel for $stat with exception ${e.message}")
+        }finally {
+            db.close()
+        }
+    }
+
+    fun resetDB(){
+
+        // delete all records from table and vacuum the db
+
+        val db = this.writableDatabase
+        var qry = "DELETE FROM $TABLE_STATS"
+        db.execSQL(qry)
+        qry = "DELETE FROM $TABLE_KV"
+        db.execSQL(qry)
+        db.execSQL("vacuum")
+        db.close()
     }
 
     companion object {
