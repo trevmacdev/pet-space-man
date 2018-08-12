@@ -9,7 +9,7 @@ import android.util.Log
 class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) :
         SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION){
 
-    val tag = "DBHelper"
+    val tag = "DBHelper::: "
 
     override fun onCreate(db: SQLiteDatabase) {
 
@@ -195,6 +195,37 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         db.execSQL(qry)
         db.execSQL("vacuum")
         db.close()
+    }
+
+    // return rows in kvp table
+    // used to determine if pet has been initialized or if hatch activity should be called
+    fun countTableKVP() : Int{
+
+        val db = this.readableDatabase
+
+        val qry = """
+            SELECT COUNT(*)
+            FROM $TABLE_KV
+        """.trimIndent()
+
+        var rs: Int = 0
+
+        try {
+            val cursor = db.rawQuery(qry, null)
+            if (cursor.moveToFirst()){
+                cursor.moveToFirst()
+
+                val rs = cursor.getInt(0)
+                cursor.close()
+            }
+        } catch (e: Exception){
+            rs = 0
+            Log.i(tag, "Failed to execute query $qry with exception ${e.message}")
+
+        } finally {
+            db.close()
+            return rs
+        }
     }
 
     companion object {
