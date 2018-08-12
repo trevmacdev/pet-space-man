@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Pet_Spaceman</string>
+
+    <!-- Main Activity -->
+    <string name="loading">Loading . . .</string>
+
 </resources>

@@ -47,6 +47,12 @@ open class Pet(applicationContext: Context){
         dbHelper.insertStat("sleep", 3,3,11)
     }
 
+    fun alive() : Boolean{
+
+        return dbHelper.selectKVPValue("alive").toBoolean()
+
+    }
+
 
 
 
