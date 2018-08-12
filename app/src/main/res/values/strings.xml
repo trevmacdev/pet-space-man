@@ -3,5 +3,6 @@
 
     <!-- Main Activity -->
     <string name="loading">Loading . . .</string>
+    <string name="title_activity_game_loop">GameLoop</string>
 
 </resources>
