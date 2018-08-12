@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.Context
 import android.content.ContentValues
+import android.database.DatabaseUtils
 import android.util.Log
 
 class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) :
@@ -18,7 +19,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             $COLUMN_STAT TEXT PRIMARY KEY,
             $COLUMN_CLEVEL INTEGER,
             $COLUMN_MLEVEL INTEGER,
-            $COLUMN_TRATE INTEGER,)
+            $COLUMN_TRATE INTEGER)
         """.trimIndent()
 
         val create_kv_table = """
@@ -100,7 +101,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         val qry = """
             SELECT $COLUMN_VALUE
             FROM $TABLE_KV
-            WHERE $COLUMN_KEY = \"$key\"
+            WHERE $COLUMN_KEY = "$key";
         """.trimIndent()
 
         try {
@@ -108,7 +109,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             if (cursor.moveToFirst()){
                 cursor.moveToFirst()
 
-                val rs = cursor.getString(0)
+                rs = cursor.getString(cursor.getColumnIndex(COLUMN_VALUE))
                 cursor.close()
             }
         } catch (e: Exception){
@@ -131,7 +132,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             SELECT $v
             FROM $TABLE_STATS
             WHERE $COLUMN_STAT
-            = \"$stat\"
+            = "$stat";
         """.trimIndent()
 
         try {
@@ -139,7 +140,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             if (cursor.moveToFirst()){
                 cursor.moveToFirst()
 
-                val rs = cursor.getInt(0)
+                rs = cursor.getInt(cursor.getColumnIndex(v))
                 cursor.close()
             }
         } catch (e: Exception){
@@ -202,30 +203,10 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
     fun countTableKVP() : Int{
 
         val db = this.readableDatabase
+        val i: Long = DatabaseUtils.queryNumEntries(db, TABLE_STATS)
+        db.close()
+        return i.toInt()
 
-        val qry = """
-            SELECT COUNT(*)
-            FROM $TABLE_KV
-        """.trimIndent()
-
-        var rs: Int = 0
-
-        try {
-            val cursor = db.rawQuery(qry, null)
-            if (cursor.moveToFirst()){
-                cursor.moveToFirst()
-
-                val rs = cursor.getInt(0)
-                cursor.close()
-            }
-        } catch (e: Exception){
-            rs = 0
-            Log.i(tag, "Failed to execute query $qry with exception ${e.message}")
-
-        } finally {
-            db.close()
-            return rs
-        }
     }
 
     companion object {
@@ -233,13 +214,13 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         private val DATABASE_NAME = "pet.db"
 
         val TABLE_STATS = "tablestats"
-        val COLUMN_STAT = "stat"
+        val COLUMN_STAT = "_stat"
         val COLUMN_CLEVEL = "clevel"
         val COLUMN_MLEVEL = "mlevel"
         val COLUMN_TRATE = "trate"
 
         val TABLE_KV = "tablekvp"
-        val COLUMN_KEY = "key"
+        val COLUMN_KEY = "_key"
         val COLUMN_VALUE = "value"
     }
 

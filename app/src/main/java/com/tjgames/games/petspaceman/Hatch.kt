@@ -3,7 +3,7 @@ package com.tjgames.games.petspaceman
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -16,12 +16,17 @@ class Hatch : AppCompatActivity() {
 
         val etPetName = findViewById<EditText>(R.id.etPetName)
         val bnHatch = findViewById<Button>(R.id.bnHatch)
+        val tag = "Hatch:::"
 
         bnHatch.setOnClickListener{
+
+            Log.i(tag, "Petname is ${etPetName.text.length} characters long")
+
             if (etPetName.text.length == 0){
-                Toast.makeText(this, R.string.pet_name, Toast.LENGTH_SHORT)
+                Toast.makeText(this, R.string.pet_name, Toast.LENGTH_SHORT).show()
             }
             else{
+
                 // instantiate pet class
                 val myPet = Pet(applicationContext)
 

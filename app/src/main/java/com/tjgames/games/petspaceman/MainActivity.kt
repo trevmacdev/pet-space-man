@@ -17,22 +17,16 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, Hatch::class.java)
             startActivity(intent)
             finish()
-        } else{
-            when(myPet.alive()){
-                true -> {
+        } else if (myPet.alive()){
                     val intent = Intent(this, GameLoop::class.java)
                     startActivity(intent)
                     finish()
-                }
-                false ->{
-                    val intent = Intent(this, ResetPet::class.java)
-                    startActivity(intent)
-                    finish()
-
-                }
-            }
-
         }
-
+        else{
+            val intent = Intent(this, ResetPet::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 }
+

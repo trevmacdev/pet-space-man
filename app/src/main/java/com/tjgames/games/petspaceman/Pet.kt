@@ -17,6 +17,7 @@ open class Pet(applicationContext: Context){
 
         var rs = false
         if (dbHelper.countTableKVP() > 0) rs = true
+        Log.i(tag, "Total records in KVP is ${dbHelper.countTableKVP()}")
 
         return rs
     }
@@ -49,8 +50,11 @@ open class Pet(applicationContext: Context){
 
     fun alive() : Boolean{
 
-        return dbHelper.selectKVPValue("alive").toBoolean()
-
+        val rs = dbHelper.selectKVPValue("alive")
+        val r = true
+        Log.i(tag, "Pet is alive $rs")
+        if(rs == "true"){ val r = true } else{ val r = false }
+        return r
     }
 
 
