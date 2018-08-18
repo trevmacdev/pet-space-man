@@ -76,10 +76,10 @@ open class Pet(applicationContext: Context){
     } //selectTrate
 
     fun selectMlevel(){
-        m_level.put("eat", dbHelper.selectStat("eat", "clevel"))
-        m_level.put("sleep", dbHelper.selectStat("sleep", "clevel"))
-        m_level.put("clean", dbHelper.selectStat("clean", "clevel"))
-        m_level.put("play", dbHelper.selectStat("play", "clevel"))
+        m_level.put("eat", dbHelper.selectStat("eat", "mlevel"))
+        m_level.put("sleep", dbHelper.selectStat("sleep", "mlevel"))
+        m_level.put("clean", dbHelper.selectStat("clean", "mlevel"))
+        m_level.put("play", dbHelper.selectStat("play", "mlevel"))
     } //selectMlevel
 
     fun selectClevel(){
@@ -121,7 +121,15 @@ open class Pet(applicationContext: Context){
     } //setClevel
 
     fun worstStat() : String{
-        return c_level.toList().sortedBy { (_, value) -> value }.toMap().keys.first()
+
+        // get lowest value from c_level map
+        var worst_stat = c_level.toList().sortedBy { (_, value) -> value }.toMap().keys.first()
+
+        // if lowest clevel = corresponding mlevel then pet is happy
+        if (c_level.getValue(worst_stat) == dbHelper.selectStat(worst_stat, "mlevel"))
+            worst_stat = "happy"
+
+        return worst_stat
     } //worstStat
 
     fun selectLoopCount() : Int {
