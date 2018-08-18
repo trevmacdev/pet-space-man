@@ -38,7 +38,7 @@ class Hatch : AppCompatActivity() {
                 kvp.put("alive", "true")
 
                 // initialize pet database
-                myPet.initialisePet(kvp)
+                myPet.createPet(kvp)
 
                 // call gameloop
                 val intent = Intent(this, GameLoop::class.java)
