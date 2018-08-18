@@ -1,10 +1,7 @@
 package com.tjgames.games.petspaceman
 
-import android.content.ContentValues
 import android.content.Context
 import android.util.Log
-import java.lang.reflect.Modifier
-
 
 open class Pet(applicationContext: Context){
 
@@ -57,12 +54,7 @@ open class Pet(applicationContext: Context){
 
     // check if pet is alive
     fun alive() : Boolean{
-
-        val rs = dbHelper.selectKVPValue("alive")
-        /*val r = true
-        Log.i(tag, "Pet is alive: $rs")
-        if(rs == "true"){ val r = true } else{ val r = false }*/
-        return rs.toBoolean()
+        return dbHelper.selectKVPValue("alive").toBoolean()
     } //alive
 
     // populate maps with db stat values
@@ -90,6 +82,7 @@ open class Pet(applicationContext: Context){
     } //selectClevel
 
     // function to populate all maps and pet variables from database
+    // one ring to rule them all
     // should be called each time the game starts, in GameLoop onResume
     fun initializePet(){
         selectClevel()
@@ -120,13 +113,17 @@ open class Pet(applicationContext: Context){
         }
     } //setClevel
 
+    // retrieve the worst stat to determine GameLoop.ivImage
     fun worstStat() : String{
 
         // get lowest value from c_level map
         var worst_stat = c_level.toList().sortedBy { (_, value) -> value }.toMap().keys.first()
 
         // if lowest clevel = corresponding mlevel then pet is happy
-        if (c_level.getValue(worst_stat) == dbHelper.selectStat(worst_stat, "mlevel"))
+        /* NB:::: THIS LOGIC WILL NOT WORK IF MLEVELS VARY
+        In that event we will have to check for the highest delta between m_level and c_level, and return its key
+         */
+        if (c_level.getValue(worst_stat) == m_level.getValue(worst_stat))
             worst_stat = "happy"
 
         return worst_stat
