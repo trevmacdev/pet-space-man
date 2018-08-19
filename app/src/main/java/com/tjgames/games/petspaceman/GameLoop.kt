@@ -18,13 +18,26 @@ package com.tjgames.games.petspaceman
             >   onResume
                 - set pet image
                 - set bnAction
+                - set looping = true
+                - call gameLoop
+            >   onPause
+                - set looping = false
             >   onDestroy
                 - update database
  Sec 5. Helper functions
             >   setActionButton
             >   changeStats
             >   setPetImage
-
+ Sec 6. Game Loop
+            > gameLoop
+                - fixdedTimerDelay calls loop_action at interval "speed"
+                - recall gameLoop if looping is false
+            > loop_action
+                - update loop_count
+                - update pet stats
+                - update pet image
+                - update alive stat
+                - call reset activity is pet is dead
 
 *******
  * End class header
@@ -37,9 +50,12 @@ package com.tjgames.games.petspaceman
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import kotlin.concurrent.fixedRateTimer
+
 
 /*******
  * End imports
@@ -53,7 +69,12 @@ class GameLoop : AppCompatActivity() {
      */
 
     val myPet = Pet(applicationContext)
+
     var loop_count = myPet.selectLoopCount()
+    var looping = false // when to start and stop gameloop
+    var speed: Long = 10000 // delay gameloop by speed milliseconds
+
+    val tag = "GameLoop::: "
 
     /* determines the focus of bnAction
     1 eat
@@ -112,7 +133,13 @@ class GameLoop : AppCompatActivity() {
         // refresh images
         setPetImage()
         setActionButton()
-        // TODO start game loop
+        looping = true
+        gameLoop()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        looping = false
     }
 
     override fun onDestroy() {
@@ -170,5 +197,58 @@ class GameLoop : AppCompatActivity() {
      * End helper functions
      */
 
+    /*******
+     * Start game loop
+     * Sec 6
+     */
+
+    fun gameLoop(){
+
+        // print hello world every 1000 ms
+        val fixedRateTimer = fixedRateTimer(name = "hello-timer",
+                initialDelay = 1000, period = 1000) {
+            loop_action()
+        }
+
+        try {
+            // this is what actually delays the loop
+            Thread.sleep(speed)
+        }
+        finally {
+            fixedRateTimer.cancel()
+        }
+
+        if (looping) gameLoop()
+    }
+
+    fun loop_action(){
+
+        Log.i(tag, "gameLoop is running")
+
+        // 1. Increment loop count
+        loop_count =+ 1
+
+        // 2. Modify stat if divisible by loop_count is wholly devisible by its trate
+        myPet.trate.keys.forEach{n ->
+            if (loop_count % myPet.trate.getValue(n) == 0){
+                myPet.setClevel((n), -1)
+            }
+        }
+
+        // 3. Update pet image
+        setPetImage()
+
+        // 4. Update pet alive stat
+        myPet.updateAlive(loop_count)
+
+        // 5. Reset game if pet is dead
+        if (!myPet.alive()){
+            //TODO create and call reset activity
+        }
+    }
+
+    /*******
+     * End game loop
+     */
 
 }
