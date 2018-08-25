@@ -6,10 +6,10 @@ import android.util.Log
 open class Pet(applicationContext: Context){
 
     // set log tag
-    val tag = "Pet::: "
+    private val tag = "Pet::: "
 
     // establish db connection
-    val dbHelper = DBHelper(applicationContext, null, null, 1)
+    private val dbHelper = DBHelper(applicationContext, null, null, 1)
 
     val trate = mutableMapOf<String, Int>()
     val m_level = mutableMapOf<String, Int>()
@@ -60,21 +60,22 @@ open class Pet(applicationContext: Context){
     // populate maps with db stat values
     // use c_level.get("eat") to get a specific clevel value
 
-    fun selectTrate(){
+    private fun selectTrate(){
         trate.put("eat", dbHelper.selectStat("eat","trate" ))
         trate.put("sleep", dbHelper.selectStat("sleep", "trate"))
         trate.put("clean", dbHelper.selectStat("clean", "trate"))
         trate.put("play", dbHelper.selectStat("play", "trate"))
+
     } //selectTrate
 
-    fun selectMlevel(){
+    private fun selectMlevel(){
         m_level.put("eat", dbHelper.selectStat("eat", "mlevel"))
         m_level.put("sleep", dbHelper.selectStat("sleep", "mlevel"))
         m_level.put("clean", dbHelper.selectStat("clean", "mlevel"))
         m_level.put("play", dbHelper.selectStat("play", "mlevel"))
     } //selectMlevel
 
-    fun selectClevel(){
+    private fun selectClevel(){
         c_level.put("eat", dbHelper.selectStat("eat", "clevel"))
         c_level.put("sleep", dbHelper.selectStat("sleep", "clevel"))
         c_level.put("clean", dbHelper.selectStat("clean", "clevel"))
@@ -83,7 +84,7 @@ open class Pet(applicationContext: Context){
 
     // function to populate all maps and pet variables from database
     // one ring to rule them all
-    // should be called each time the game starts, in GameLoop onResume
+    // should be called each time the game starts, in GameLoop onCreate
     fun initializePet(){
         selectClevel()
         selectMlevel()

@@ -1,6 +1,6 @@
 package com.tjgames.games.petspaceman
 
-/*******
+/******* Class Header
  * Start class header
  * Sec 1
 
@@ -32,7 +32,7 @@ package com.tjgames.games.petspaceman
             > gameLoop
                 - fixdedTimerDelay calls loop_action at interval "speed"
                 - recall gameLoop if looping is false
-            > loop_action
+            > loopAction
                 - update loop_count
                 - update pet stats
                 - update pet image
@@ -51,10 +51,8 @@ package com.tjgames.games.petspaceman
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import kotlin.concurrent.fixedRateTimer
+import kotlinx.android.synthetic.main.activity_game_loop.*
+import android.os.Handler
 
 
 /*******
@@ -63,18 +61,20 @@ import kotlin.concurrent.fixedRateTimer
 
 class GameLoop : AppCompatActivity() {
 
+
+
     /*******
      * Start declare class variables
      * Sec 3
      */
 
-    val myPet = Pet(applicationContext)
+    // create log tag
+    private val tag = "GameLoop::: "
 
-    var loop_count = myPet.selectLoopCount()
-    var looping = false // when to start and stop gameloop
-    var speed: Long = 10000 // delay gameloop by speed milliseconds
-
-    val tag = "GameLoop::: "
+    // declare abstract class variables
+    private val myPet by lazy { Pet(applicationContext) }
+    //private var myPet: Pet? = null
+    private var loopCount = 0
 
     /* determines the focus of bnAction
     1 eat
@@ -82,14 +82,11 @@ class GameLoop : AppCompatActivity() {
     3 play
     4 sleep
      */
-    var cAction = 1
+    private var cAction = 1
 
-    val bnLeft = findViewById<ImageButton>(R.id.bnLeft)
-    val bnRight = findViewById<ImageButton>(R.id.bnRight)
-    val bnAction = findViewById<ImageButton>(R.id.bnAction)
-
-    val tvPetName = findViewById<TextView>(R.id.tvPetName)
-    val ivSpaceman = findViewById<ImageView>(R.id.ivSpaceman)
+    // control game loop
+    private var speed: Long = 1000
+    private val handler: Handler = Handler()
 
     /*******
      * End declare class variables
@@ -104,22 +101,27 @@ class GameLoop : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
 
+        //myPet = Pet(applicationContext)
+
+        // retrieve myPets values from database
+        myPet.initializePet()
+
         // display pet name in text view
         tvPetName.text = myPet.selectPetName()
 
+        // set click listeners
+
         bnLeft.setOnClickListener{
             // cycle the cAction values if cAction = 1 -- far left
-            if (cAction == 1)
-                cAction = 4
-            else cAction =- 1
+            cAction = if (cAction == 1) 4
+            else cAction - 1
             setActionButton()
         } // bnLeft
 
         bnRight.setOnClickListener{
             // cycle the cAction values if cAction = 4 -- far right
-            if (cAction == 4)
-                cAction = 1
-            else cAction =+ 1
+            cAction = if (cAction == 4) 1
+            else cAction + 1
             setActionButton()
         } // bnRight
 
@@ -133,23 +135,23 @@ class GameLoop : AppCompatActivity() {
         // refresh images
         setPetImage()
         setActionButton()
-        looping = true
-        gameLoop()
-    }
+
+        handler.postDelayed(gameLoop(), speed)
+    } // onResume
 
     override fun onPause() {
         super.onPause()
-        looping = false
-    }
+        handler.removeCallbacks(gameLoop())
+    } // onPause
 
     override fun onDestroy() {
         super.onDestroy()
         // save loop count to database
-        myPet.updateLoopCount(loop_count)
+        myPet.updateLoopCount(loopCount)
 
         // save clevel map to database
         myPet.updateClevel()
-    }
+    } //onDestroy
 
     /*******
      * End "on" methods
@@ -160,7 +162,7 @@ class GameLoop : AppCompatActivity() {
      * Sec 5
      */
 
-    fun setActionButton(){
+    private fun setActionButton(){
         // set bnAction image based on the value of cAction
         when (cAction){
             1 -> bnAction.setImageResource(R.drawable.button_eat)
@@ -170,7 +172,8 @@ class GameLoop : AppCompatActivity() {
         }
     } // setActionButton
 
-    fun changeStats(mod: Int){
+    // modify the clevel stat when bnAction pressed or the game loop runs
+    private fun changeStats(mod: Int){
 
         // change clevel
         when (cAction){
@@ -182,7 +185,8 @@ class GameLoop : AppCompatActivity() {
         setPetImage()
     } // changeStats
 
-    fun setPetImage(){
+    // set the pet image based on the worst clevel stat
+    private fun setPetImage(){
         // refresh the spaceman image
         when (myPet.worstStat()){
             "eat" -> ivSpaceman.setImageResource(R.drawable.spaceman_eat)
@@ -202,35 +206,24 @@ class GameLoop : AppCompatActivity() {
      * Sec 6
      */
 
-    fun gameLoop(){
+    private fun gameLoop() : Runnable = Runnable {
 
-        // print hello world every 1000 ms
-        val fixedRateTimer = fixedRateTimer(name = "hello-timer",
-                initialDelay = 1000, period = 1000) {
-            loop_action()
-        }
+        Log.i(tag, "Running gameloop in thread")
 
-        try {
-            // this is what actually delays the loop
-            Thread.sleep(speed)
-        }
-        finally {
-            fixedRateTimer.cancel()
-        }
+        loopAction()
+        handler.postDelayed(gameLoop(), speed)
+    } //gameLoop
 
-        if (looping) gameLoop()
-    }
-
-    fun loop_action(){
+    private fun loopAction() {
 
         Log.i(tag, "gameLoop is running")
 
         // 1. Increment loop count
-        loop_count =+ 1
+        loopCount = +1
 
         // 2. Modify stat if divisible by loop_count is wholly devisible by its trate
-        myPet.trate.keys.forEach{n ->
-            if (loop_count % myPet.trate.getValue(n) == 0){
+        myPet.trate.keys.forEach { n ->
+            if (loopCount % myPet.trate.getValue(n) == 0) {
                 myPet.setClevel((n), -1)
             }
         }
@@ -239,13 +232,13 @@ class GameLoop : AppCompatActivity() {
         setPetImage()
 
         // 4. Update pet alive stat
-        myPet.updateAlive(loop_count)
+        myPet.updateAlive(loopCount)
 
         // 5. Reset game if pet is dead
-        if (!myPet.alive()){
+        if (!myPet.alive()) {
             //TODO create and call reset activity
         }
-    }
+    } // loopAction
 
     /*******
      * End game loop
