@@ -22,7 +22,7 @@ package com.tjgames.games.petspaceman
                 - call gameLoop
             >   onPause
                 - set looping = false
-            >   onDestroy
+                - set loopCount
                 - update database
  Sec 5. Helper functions
             >   setActionButton
@@ -137,13 +137,8 @@ class GameLoop : AppCompatActivity() {
         super.onPause()
         myPet.updateLoopCount(loopCount)
         handler.removeCallbacks(gameLoop())
-    } // onPause
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // save clevel map to database
         myPet.updateClevel()
-    } //onDestroy
+    } // onPause
 
     /*******
      * End "on" methods
