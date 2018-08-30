@@ -15,8 +15,6 @@ open class Pet(applicationContext: Context){
     val m_level = mutableMapOf<String, Int>()
     var c_level = mutableMapOf<String, Int>()
 
-
-
     fun petExists(): Boolean{
         var rs = false
         if (dbHelper.countTableKVP() > 0) rs = true

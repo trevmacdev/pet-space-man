@@ -54,14 +54,11 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_game_loop.*
 import android.os.Handler
 
-
 /*******
  * End imports
  */
 
 class GameLoop : AppCompatActivity() {
-
-
 
     /*******
      * Start declare class variables
@@ -69,7 +66,7 @@ class GameLoop : AppCompatActivity() {
      */
 
     // create log tag
-    private val tag = "GameLoop::: "
+    //private val tag = "GameLoop::: "
 
     // declare abstract class variables
     private val myPet by lazy { Pet(applicationContext) }
@@ -99,8 +96,6 @@ class GameLoop : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
-
-        //myPet = Pet(applicationContext)
 
         // retrieve myPets values from database
         myPet.initializePet()
