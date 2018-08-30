@@ -85,7 +85,7 @@ class GameLoop : AppCompatActivity() {
     private var cAction = 1
 
     // control game loop
-    private var speed: Long = 1000
+    private var speed: Long = 10000
     private val handler: Handler = Handler()
 
     /*******
@@ -136,18 +136,23 @@ class GameLoop : AppCompatActivity() {
         setPetImage()
         setActionButton()
 
+        loopCount = myPet.selectLoopCount()
+        Log.i(tag, "onResume loopCount = $loopCount")
+
         handler.postDelayed(gameLoop(), speed)
     } // onResume
 
     override fun onPause() {
         super.onPause()
+        myPet.updateLoopCount(loopCount)
+
         handler.removeCallbacks(gameLoop())
     } // onPause
 
     override fun onDestroy() {
         super.onDestroy()
         // save loop count to database
-        myPet.updateLoopCount(loopCount)
+
 
         // save clevel map to database
         myPet.updateClevel()
@@ -175,6 +180,14 @@ class GameLoop : AppCompatActivity() {
     // modify the clevel stat when bnAction pressed or the game loop runs
     private fun changeStats(mod: Int){
 
+        // log clevel
+        when (cAction) {
+            1 -> Log.i(tag, "sending clevel eat: $mod")
+            2 -> Log.i(tag, "sending clevel clean: $mod")
+            3 -> Log.i(tag, "sending clevel play: $mod")
+            4 -> Log.i(tag, "sending clevel sleep: $mod")
+        }
+
         // change clevel
         when (cAction){
             1 -> myPet.setClevel("eat", mod)
@@ -188,6 +201,7 @@ class GameLoop : AppCompatActivity() {
     // set the pet image based on the worst clevel stat
     private fun setPetImage(){
         // refresh the spaceman image
+        Log.i(tag, "setPetImage: ${myPet.worstStat()}")
         when (myPet.worstStat()){
             "eat" -> ivSpaceman.setImageResource(R.drawable.spaceman_eat)
             "clean" -> ivSpaceman.setImageResource(R.drawable.spaceman_clean)
@@ -219,14 +233,15 @@ class GameLoop : AppCompatActivity() {
         Log.i(tag, "gameLoop is running")
 
         // 1. Increment loop count
-        loopCount = +1
+        loopCount = loopCount + 1
 
-        // 2. Modify stat if divisible by loop_count is wholly devisible by its trate
-        myPet.trate.keys.forEach { n ->
-            if (loopCount % myPet.trate.getValue(n) == 0) {
-                myPet.setClevel((n), -1)
-            }
-        }
+        // 2. Modify stat if loop_count is wholly divisible by its trate
+        Log.i(tag, "loopcount = $loopCount")
+        Log.i(tag, "trates are eat: ${myPet.trate}")
+        if (loopCount % myPet.trate.get("eat")!! == 0) myPet.setClevel("eat", -1)
+        if (loopCount % myPet.trate.get("sleep")!! == 0) myPet.setClevel("sleep", -1)
+        if (loopCount % myPet.trate.get("play")!! == 0) myPet.setClevel("play", -1)
+        if (loopCount % myPet.trate.get("clean")!! == 0) myPet.setClevel("clean", -1)
 
         // 3. Update pet image
         setPetImage()

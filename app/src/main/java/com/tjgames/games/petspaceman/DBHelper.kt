@@ -153,6 +153,36 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         }
     }
 
+    fun selectLowestCLevel(): String{
+
+        val db = this.readableDatabase
+
+        var rs: String? = null
+
+        val qry = """
+            SELECT $COLUMN_STAT
+            FROM $TABLE_STATS
+            ORDER BY $COLUMN_CLEVEL ASC;
+        """.trimIndent()
+
+        try {
+            val cursor = db.rawQuery(qry, null)
+            if (cursor.moveToFirst()){
+                cursor.moveToFirst()
+
+                rs = cursor.getString(cursor.getColumnIndex(COLUMN_STAT))
+                cursor.close()
+            }
+        } catch (e: Exception){
+            rs = "selectLowestCLevel failed"
+            Log.i(tag, "Failed to execute query $qry with exception ${e.message}")
+
+        } finally {
+            db.close()
+            return rs!!
+        }
+    }
+
     fun updateTableKVP(key: String, value: String){
 
         val db = this.writableDatabase
@@ -161,7 +191,7 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         values.put(COLUMN_VALUE, value)
 
         try{
-            db.update(TABLE_KV, values, "$COLUMN_KEY = $key", null)
+            db.update(TABLE_KV, values, "$COLUMN_KEY = '$key'", null)
         }catch (e: Exception){
             Log.i(tag, "Failed to update kvp table $key with exception ${e.message}")
         }finally {
@@ -177,7 +207,8 @@ class DBHelper(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         values.put(COLUMN_CLEVEL, value)
 
         try{
-            db.update(TABLE_STATS, values, "$COLUMN_STAT = $stat", null)
+            db.update(TABLE_STATS, values, "$COLUMN_STAT = '$stat'", null)
+            Log.i(tag, "Updated $TABLE_STATS: $stat to $value")
         }catch (e: Exception){
             Log.i(tag, "Failed to update stat clevel for $stat with exception ${e.message}")
         }finally {

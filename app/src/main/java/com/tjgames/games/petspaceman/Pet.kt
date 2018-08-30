@@ -46,9 +46,9 @@ open class Pet(applicationContext: Context){
             dbHelper.insertKVP(k, v)
         }
 
-        dbHelper.insertStat("eat", 3,3,3)
-        dbHelper.insertStat("play", 3, 3, 5)
-        dbHelper.insertStat("clean", 3,3,9)
+        dbHelper.insertStat("eat", 3,3,2)
+        dbHelper.insertStat("play", 3, 3, 3)
+        dbHelper.insertStat("clean", 3,3,5)
         dbHelper.insertStat("sleep", 3,3,11)
     } //createPet
 
@@ -99,35 +99,44 @@ open class Pet(applicationContext: Context){
     // setter to update c_level map when action button clicked
     fun setClevel(key: String, mod: Int){
 
-        // determine the new value (v) for c_level[kay]
+        // determine the new value (v) for c_level[key]
         val v = c_level.get(key)!! + mod
 
-        // only modify the value if v is between -1 and mlevel + 1 (exclusive)
+        Log.i(tag, "mlevels are $m_level")
+        Log.i(tag, "clevels are $c_level")
+        Log.i(tag, "change $key to $v")
+
+        // only modify the value if v is between -1\ and mlevel + 1 (exclusive)
         if (v > -1 && v < m_level.get(key)!! + 1) {
+            Log.i(tag, "v is $v which is between -1 and ${m_level.get(key)!!} so updating database")
             // update database
             dbHelper.updateTableCLevel(key, v)
+
+            Log.i(tag, "set database clevel for $key to ${dbHelper.selectStat(key, "clevel")}")
 
             //TODO: check this for a memory leak
             // update clevel map
             c_level.remove(key)
             c_level.put(key, v)
+            Log.i(tag, "updating c_level map: $c_level")
         }
     } //setClevel
 
     // retrieve the worst stat to determine GameLoop.ivImage
     fun worstStat() : String{
 
-        // get lowest value from c_level map
-        var worst_stat = c_level.toList().sortedBy { (_, value) -> value }.toMap().keys.first()
+        val worststat = dbHelper.selectLowestCLevel()
 
-        // if lowest clevel = corresponding mlevel then pet is happy
-        /* NB:::: THIS LOGIC WILL NOT WORK IF MLEVELS VARY
-        In that event we will have to check for the highest delta between m_level and c_level, and return its key
-         */
-        if (c_level.getValue(worst_stat) == m_level.getValue(worst_stat))
-            worst_stat = "happy"
+        Log.i(tag, "worst stat is $worststat")
 
-        return worst_stat
+        if (c_level.get(worststat) == m_level.get(worststat)) {
+            Log.i(tag, "returning happy because ${c_level.get(worststat)} equals ${m_level.get(worststat)}")
+            return "happy"
+        }
+        else {
+            Log.i(tag, "returning $worststat because ${c_level.get(worststat)} !equals ${m_level.get(worststat)}")
+            return worststat
+        }
     } //worstStat
 
     fun selectLoopCount() : Int {
