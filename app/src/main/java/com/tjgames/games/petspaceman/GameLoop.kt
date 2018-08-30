@@ -50,7 +50,7 @@ package com.tjgames.games.petspaceman
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
+//import android.util.Log
 import kotlinx.android.synthetic.main.activity_game_loop.*
 import android.os.Handler
 
@@ -73,7 +73,6 @@ class GameLoop : AppCompatActivity() {
 
     // declare abstract class variables
     private val myPet by lazy { Pet(applicationContext) }
-    //private var myPet: Pet? = null
     private var loopCount = 0
 
     /* determines the focus of bnAction
@@ -135,25 +134,18 @@ class GameLoop : AppCompatActivity() {
         // refresh images
         setPetImage()
         setActionButton()
-
         loopCount = myPet.selectLoopCount()
-        Log.i(tag, "onResume loopCount = $loopCount")
-
         handler.postDelayed(gameLoop(), speed)
     } // onResume
 
     override fun onPause() {
         super.onPause()
         myPet.updateLoopCount(loopCount)
-
         handler.removeCallbacks(gameLoop())
     } // onPause
 
     override fun onDestroy() {
         super.onDestroy()
-        // save loop count to database
-
-
         // save clevel map to database
         myPet.updateClevel()
     } //onDestroy
@@ -179,15 +171,6 @@ class GameLoop : AppCompatActivity() {
 
     // modify the clevel stat when bnAction pressed or the game loop runs
     private fun changeStats(mod: Int){
-
-        // log clevel
-        when (cAction) {
-            1 -> Log.i(tag, "sending clevel eat: $mod")
-            2 -> Log.i(tag, "sending clevel clean: $mod")
-            3 -> Log.i(tag, "sending clevel play: $mod")
-            4 -> Log.i(tag, "sending clevel sleep: $mod")
-        }
-
         // change clevel
         when (cAction){
             1 -> myPet.setClevel("eat", mod)
@@ -201,7 +184,6 @@ class GameLoop : AppCompatActivity() {
     // set the pet image based on the worst clevel stat
     private fun setPetImage(){
         // refresh the spaceman image
-        Log.i(tag, "setPetImage: ${myPet.worstStat()}")
         when (myPet.worstStat()){
             "eat" -> ivSpaceman.setImageResource(R.drawable.spaceman_eat)
             "clean" -> ivSpaceman.setImageResource(R.drawable.spaceman_clean)
@@ -221,23 +203,15 @@ class GameLoop : AppCompatActivity() {
      */
 
     private fun gameLoop() : Runnable = Runnable {
-
-        Log.i(tag, "Running gameloop in thread")
-
         loopAction()
         handler.postDelayed(gameLoop(), speed)
     } //gameLoop
 
     private fun loopAction() {
-
-        Log.i(tag, "gameLoop is running")
-
         // 1. Increment loop count
         loopCount = loopCount + 1
 
         // 2. Modify stat if loop_count is wholly divisible by its trate
-        Log.i(tag, "loopcount = $loopCount")
-        Log.i(tag, "trates are eat: ${myPet.trate}")
         if (loopCount % myPet.trate.get("eat")!! == 0) myPet.setClevel("eat", -1)
         if (loopCount % myPet.trate.get("sleep")!! == 0) myPet.setClevel("sleep", -1)
         if (loopCount % myPet.trate.get("play")!! == 0) myPet.setClevel("play", -1)

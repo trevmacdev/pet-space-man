@@ -1,12 +1,12 @@
 package com.tjgames.games.petspaceman
 
 import android.content.Context
-import android.util.Log
+//import android.util.Log
 
 open class Pet(applicationContext: Context){
 
     // set log tag
-    private val tag = "Pet::: "
+    //private val tag = "Pet::: "
 
     // establish db connection
     private val dbHelper = DBHelper(applicationContext, null, null, 1)
@@ -18,11 +18,8 @@ open class Pet(applicationContext: Context){
 
 
     fun petExists(): Boolean{
-
         var rs = false
         if (dbHelper.countTableKVP() > 0) rs = true
-        Log.i(tag, "Total records in KVP is ${dbHelper.countTableKVP()}")
-
         return rs
     } // petExists
 
@@ -102,23 +99,15 @@ open class Pet(applicationContext: Context){
         // determine the new value (v) for c_level[key]
         val v = c_level.get(key)!! + mod
 
-        Log.i(tag, "mlevels are $m_level")
-        Log.i(tag, "clevels are $c_level")
-        Log.i(tag, "change $key to $v")
-
         // only modify the value if v is between -1\ and mlevel + 1 (exclusive)
         if (v > -1 && v < m_level.get(key)!! + 1) {
-            Log.i(tag, "v is $v which is between -1 and ${m_level.get(key)!!} so updating database")
             // update database
             dbHelper.updateTableCLevel(key, v)
-
-            Log.i(tag, "set database clevel for $key to ${dbHelper.selectStat(key, "clevel")}")
 
             //TODO: check this for a memory leak
             // update clevel map
             c_level.remove(key)
             c_level.put(key, v)
-            Log.i(tag, "updating c_level map: $c_level")
         }
     } //setClevel
 
@@ -127,14 +116,10 @@ open class Pet(applicationContext: Context){
 
         val worststat = dbHelper.selectLowestCLevel()
 
-        Log.i(tag, "worst stat is $worststat")
-
         if (c_level.get(worststat) == m_level.get(worststat)) {
-            Log.i(tag, "returning happy because ${c_level.get(worststat)} equals ${m_level.get(worststat)}")
             return "happy"
         }
         else {
-            Log.i(tag, "returning $worststat because ${c_level.get(worststat)} !equals ${m_level.get(worststat)}")
             return worststat
         }
     } //worstStat
@@ -160,7 +145,7 @@ open class Pet(applicationContext: Context){
         }
 
         // Check if pet has died from neglect
-        var i: Int = 0
+        var i = 0
         c_level.values.forEach { n -> i = i + n }
 
         if (i < 4) dbHelper.updateTableKVP("alive", "false")
