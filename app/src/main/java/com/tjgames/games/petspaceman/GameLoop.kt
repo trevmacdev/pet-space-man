@@ -82,7 +82,7 @@ class GameLoop : AppCompatActivity() {
 
     // control game loop
     private var speed: Long = 10000
-    private val handler: Handler = Handler()
+    private val handler: Handler by lazy { Handler() }
 
     /*******
      * End declare class variables
@@ -96,9 +96,6 @@ class GameLoop : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
-
-        // retrieve myPets values from database
-        myPet.initializePet()
 
         // display pet name in text view
         tvPetName.text = myPet.selectPetName()
@@ -137,7 +134,6 @@ class GameLoop : AppCompatActivity() {
         super.onPause()
         myPet.updateLoopCount(loopCount)
         handler.removeCallbacks(gameLoop())
-        myPet.updateClevel()
     } // onPause
 
     /*******
@@ -202,10 +198,10 @@ class GameLoop : AppCompatActivity() {
         loopCount = loopCount + 1
 
         // 2. Modify stat if loop_count is wholly divisible by its trate
-        if (loopCount % myPet.trate.get("eat")!! == 0) myPet.setClevel("eat", -1)
-        if (loopCount % myPet.trate.get("sleep")!! == 0) myPet.setClevel("sleep", -1)
-        if (loopCount % myPet.trate.get("play")!! == 0) myPet.setClevel("play", -1)
-        if (loopCount % myPet.trate.get("clean")!! == 0) myPet.setClevel("clean", -1)
+        if (loopCount % myPet.eat_trate == 0) myPet.setClevel("eat", -1)
+        if (loopCount % myPet.sleep_trate == 0) myPet.setClevel("sleep", -1)
+        if (loopCount % myPet.play_trate == 0) myPet.setClevel("play", -1)
+        if (loopCount % myPet.clean_trate == 0) myPet.setClevel("clean", -1)
 
         // 3. Update pet image
         setPetImage()

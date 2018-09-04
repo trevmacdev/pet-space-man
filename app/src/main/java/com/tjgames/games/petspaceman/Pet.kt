@@ -11,9 +11,12 @@ open class Pet(applicationContext: Context){
     // establish db connection
     private val dbHelper = DBHelper(applicationContext, null, null, 1)
 
-    val trate = mutableMapOf<String, Int>()
-    val m_level = mutableMapOf<String, Int>()
-    var c_level = mutableMapOf<String, Int>()
+    // get static values from database (trate)
+
+    val eat_trate by lazy { dbHelper.selectStat("eat","trate") }
+    val play_trate by lazy { dbHelper.selectStat("play","trate") }
+    val clean_trate by lazy { dbHelper.selectStat("clean","trate") }
+    val sleep_trate by lazy { dbHelper.selectStat("sleep","trate") }
 
     fun petExists(): Boolean{
         var rs = false
@@ -52,60 +55,16 @@ open class Pet(applicationContext: Context){
         return dbHelper.selectKVPValue("alive").toBoolean()
     } //alive
 
-    // populate maps with db stat values
-    // use c_level.get("eat") to get a specific clevel value
-
-    private fun selectTrate(){
-        trate.put("eat", dbHelper.selectStat("eat","trate" ))
-        trate.put("sleep", dbHelper.selectStat("sleep", "trate"))
-        trate.put("clean", dbHelper.selectStat("clean", "trate"))
-        trate.put("play", dbHelper.selectStat("play", "trate"))
-
-    } //selectTrate
-
-    private fun selectMlevel(){
-        m_level.put("eat", dbHelper.selectStat("eat", "mlevel"))
-        m_level.put("sleep", dbHelper.selectStat("sleep", "mlevel"))
-        m_level.put("clean", dbHelper.selectStat("clean", "mlevel"))
-        m_level.put("play", dbHelper.selectStat("play", "mlevel"))
-    } //selectMlevel
-
-    private fun selectClevel(){
-        c_level.put("eat", dbHelper.selectStat("eat", "clevel"))
-        c_level.put("sleep", dbHelper.selectStat("sleep", "clevel"))
-        c_level.put("clean", dbHelper.selectStat("clean", "clevel"))
-        c_level.put("play", dbHelper.selectStat("play", "clevel"))
-    } //selectClevel
-
-    // function to populate all maps and pet variables from database
-    // one ring to rule them all
-    // should be called each time the game starts, in GameLoop onCreate
-    fun initializePet(){
-        selectClevel()
-        selectMlevel()
-        selectTrate()
-    } //initializePet
-
-    // update db stats with all c_level values
-    fun updateClevel(){
-        for ((k, v) in c_level) dbHelper.updateTableCLevel(k, v)
-    } //updateClevel
-
     // setter to update c_level map when action button clicked
-    fun setClevel(key: String, mod: Int){
+    fun setClevel(stat: String, mod: Int){
 
         // determine the new value (v) for c_level[key]
-        val v = c_level.get(key)!! + mod
+        val v = dbHelper.selectStat(stat, "clevel") + mod
 
         // only modify the value if v is between -1\ and mlevel + 1 (exclusive)
-        if (v > -1 && v < m_level.get(key)!! + 1) {
+        if (v > -1 && v < 4) {
             // update database
-            dbHelper.updateTableCLevel(key, v)
-
-            //TODO: check this for a memory leak
-            // update clevel map
-            c_level.remove(key)
-            c_level.put(key, v)
+            dbHelper.updateTableCLevel(stat, v)
         }
     } //setClevel
 
@@ -114,12 +73,18 @@ open class Pet(applicationContext: Context){
 
         val worststat = dbHelper.selectLowestCLevel()
 
-        if (c_level.get(worststat) == m_level.get(worststat)) {
+        /*if (c_level.get(worststat) == m_level.get(worststat)) {
             return "happy"
         }
         else {
             return worststat
-        }
+        }*/
+
+        if (dbHelper.selectStat(worststat, "clevel") == dbHelper.selectStat(worststat, "mlevel"))
+            return "happy"
+        else
+            return worststat
+
     } //worstStat
 
     fun selectLoopCount() : Int {
@@ -143,10 +108,14 @@ open class Pet(applicationContext: Context){
         }
 
         // Check if pet has died from neglect
-        var i = 0
-        c_level.values.forEach { n -> i = i + n }
 
-        if (i < 4) dbHelper.updateTableKVP("alive", "false")
+        if (dbHelper.selectStat("eat", "clevel") +
+                dbHelper.selectStat("play", "clevel") +
+                dbHelper.selectStat("clean", "clevel") +
+                dbHelper.selectStat("sleep", "clevel") < 2)
+            dbHelper.updateTableKVP("alive", "false")
+
+
     }
 
 
