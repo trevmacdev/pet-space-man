@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // get application context
-        val myPet= Pet(applicationContext)
+        val myPet = Pet(applicationContext)
 
         if (!myPet.petExists()){
             val intent = Intent(this, Hatch::class.java)

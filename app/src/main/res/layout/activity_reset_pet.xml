@@ -10,7 +10,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text="reset activity"
         tools:layout_editor_absoluteX="58dp"
         tools:layout_editor_absoluteY="44dp" />
 </android.support.constraint.ConstraintLayout>
